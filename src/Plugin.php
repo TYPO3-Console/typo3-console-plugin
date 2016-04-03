@@ -67,6 +67,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      */
     public function onPostAutoloadDump(\Composer\Script\Event $event)
     {
+        require $event->getComposer()->getConfig()->get('vendor-dir') . '/autoload.php';
         \Helhum\Typo3Console\Composer\InstallerScripts::setupConsole($event, true);
     }
 }
