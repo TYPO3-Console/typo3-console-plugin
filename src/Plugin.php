@@ -14,6 +14,7 @@ use Composer\Composer;
 use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
+use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
 
 /**
@@ -22,32 +23,9 @@ use Composer\Script\ScriptEvents;
 class Plugin implements PluginInterface, EventSubscriberInterface
 {
     /**
-     * @var Composer
+     * @var PluginImplementation
      */
-    protected $composer;
-
-    /**
-     * @var IOInterface
-     */
-    protected $io;
-
-    /**
-     * @var Config
-     */
-    protected $config;
-
-    /**
-     * Apply plugin modifications to composer
-     *
-     * @param Composer $composer
-     * @param IOInterface $io
-     */
-    public function activate(Composer $composer, IOInterface $io)
-    {
-        $this->config = Config::load($io, $composer->getConfig());
-        $this->composer = $composer;
-        $this->io = $io;
-    }
+    private $pluginImplementation;
 
     /**
      * {@inheritDoc}
@@ -55,19 +33,52 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            ScriptEvents::POST_AUTOLOAD_DUMP => array('onPostAutoloadDump')
+            ScriptEvents::POST_AUTOLOAD_DUMP => array('listen')
         );
     }
 
     /**
-     * Plugin callback for this script event, which calls the previously implemented static method
-     *
-     * @param \Composer\Script\Event $event
-     * @return bool
+     * {@inheritdoc}
      */
-    public function onPostAutoloadDump(\Composer\Script\Event $event)
+    public function activate(Composer $composer, IOInterface $io)
     {
-        require $event->getComposer()->getConfig()->get('vendor-dir') . '/autoload.php';
-        \Helhum\Typo3Console\Composer\InstallerScripts::setupConsole($event, true);
+        $composer->getEventDispatcher()->addSubscriber($this);
+    }
+
+    /**
+     * Listens to Composer events.
+     *
+     * This method is very minimalist on purpose. We want to load the actual
+     * implementation only after updating the Composer packages so that we get
+     * the updated version (if available).
+     *
+     * @param Event $event The Composer event.
+     */
+    public function listen(Event $event)
+    {
+        // Plugin has been uninstalled
+        if (!file_exists(__FILE__) || !file_exists(__DIR__ . '/PluginImplementation.php')) {
+            return;
+        }
+
+        // Load the implementation only after updating Composer so that we get
+        // the new version of the plugin when a new one was installed
+        if (null === $this->pluginImplementation) {
+            $this->pluginImplementation = new PluginImplementation($event);
+        }
+
+        switch ($event->getName()) {
+            case ScriptEvents::POST_AUTOLOAD_DUMP:
+                $this->pluginImplementation->postAutoloadDump();
+                break;
+        }
+    }
+
+    /**
+     * @param PluginImplementation $pluginImplementation
+     */
+    public function setPluginImpl(PluginImplementation $pluginImplementation)
+    {
+        $this->pluginImplementation = $pluginImplementation;
     }
 }
