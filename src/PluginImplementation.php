@@ -73,28 +73,9 @@ class PluginImplementation
 
     /**
      * Action called after autoload dump
-     *
-     * @return bool
      */
     public function postAutoloadDump()
     {
-        $this->registerLoader();
         $this->scriptDispatcher->executeScripts();
-        $this->unRegisterLoader();
-    }
-
-    private function registerLoader()
-    {
-        $package = $this->composer->getPackage();
-        $generator = $this->composer->getAutoloadGenerator();
-        $packages = $this->composer->getRepositoryManager()->getLocalRepository()->getCanonicalPackages();
-        $packageMap = $generator->buildPackageMap($this->composer->getInstallationManager(), $package, $packages);
-        $map = $generator->parseAutoloads($packageMap, $package);
-        $this->loader = $generator->createLoader($map);
-        $this->loader->register();
-    }
-
-    private function unRegisterLoader() {
-        $this->loader->unregister();
     }
 }

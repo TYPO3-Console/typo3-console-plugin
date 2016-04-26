@@ -10,6 +10,8 @@ namespace Helhum\Typo3ConsolePlugin;
  * file that was distributed with this source code.
  */
 
+use Composer\Autoload\ClassLoader;
+use Composer\Composer;
 use Composer\Script\Event;
 
 /**
@@ -26,15 +28,49 @@ class ScriptDispatcher
      * @var Config
      */
     private $config;
-    
+
+    /**
+     * @var Composer
+     */
+    private $composer;
+
+    /**
+     * @var ClassLoader
+     */
+    private $loader;
+
+    /**
+     * ScriptDispatcher constructor.
+     *
+     * @param Event $event
+     * @param Config $config
+     */
     public function __construct(Event $event, Config $config)
     {
         $this->event = $event;
+        $this->composer = $event->getComposer();
         $this->config = $config;
     }
 
     public function executeScripts()
     {
+        $this->registerLoader();
         \Helhum\Typo3Console\Composer\InstallerScripts::setupConsole($this->event, true);
+        $this->unRegisterLoader();
+    }
+
+    private function registerLoader()
+    {
+        $package = $this->composer->getPackage();
+        $generator = $this->composer->getAutoloadGenerator();
+        $packages = $this->composer->getRepositoryManager()->getLocalRepository()->getCanonicalPackages();
+        $packageMap = $generator->buildPackageMap($this->composer->getInstallationManager(), $package, $packages);
+        $map = $generator->parseAutoloads($packageMap, $package);
+        $this->loader = $generator->createLoader($map);
+        $this->loader->register();
+    }
+
+    private function unRegisterLoader() {
+        $this->loader->unregister();
     }
 }
