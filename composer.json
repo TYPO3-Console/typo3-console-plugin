@@ -16,7 +16,8 @@
     "autoload": {
         "psr-4": {
             "Helhum\\Typo3ConsolePlugin\\": "src/"
-        }
+        },
+        "files": ["res/php/autoload-include.php"]
     },
     "require": {
         "php": ">=5.5.0",
@@ -24,6 +25,9 @@
     },
     "require-dev": {
         "composer/composer": "^1.0"
+    },
+    "scripts": {
+        "pre-autoload-dump": "[ ! -f res/php/autoload-include.php ] && echo '<?php' > res/php/autoload-include.php"
     },
     "extra": {
         "class": "Helhum\\Typo3ConsolePlugin\\Plugin",

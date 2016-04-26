@@ -14,6 +14,8 @@ use Composer\Autoload\ClassLoader;
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Script\Event;
+use Composer\Util\Filesystem;
+use \TYPO3\CMS\Composer\Plugin\Config as Typo3PluginConfig;
 
 /**
  * Class Plugin
@@ -26,49 +28,32 @@ class PluginImplementation
     private $event;
 
     /**
-     * @var Composer
-     */
-    private $composer;
-
-    /**
-     * @var IOInterface
-     */
-    private $io;
-
-    /**
-     * @var Config
-     */
-    private $config;
-
-    /**
-     * @var bool
-     */
-    private $isDev;
-
-    /**
-     * @var ClassLoader
-     */
-    private $loader;
-
-    /**
      * @var ScriptDispatcher
      */
     private $scriptDispatcher;
 
     /**
+     * @var IncludeFileWriter
+     */
+    private $includeFileWriter;
+
+    /**
      * PluginImplementation constructor.
      *
      * @param Event $event
+     * @param IncludeFileWriter $includeFileWriter
      * @param ScriptDispatcher $scriptDispatcher
      */
-    public function __construct(Event $event, ScriptDispatcher $scriptDispatcher = null)
+    public function __construct(Event $event, ScriptDispatcher $scriptDispatcher = null, IncludeFileWriter $includeFileWriter = null)
     {
         $this->event = $event;
-        $this->composer = $event->getComposer();
-        $this->io = $event->getIO();
-        $this->config = Config::load($this->io, $this->composer->getConfig());
-        $this->isDev = $event->isDevMode();
-        $this->scriptDispatcher = $scriptDispatcher ?: new ScriptDispatcher($event, $this->config);
+        $this->scriptDispatcher = $scriptDispatcher ?: new ScriptDispatcher($event, Config::load($event->getIO(), $event->getComposer()->getConfig()));
+        $this->includeFileWriter = $includeFileWriter ?: new IncludeFileWriter($event, Typo3PluginConfig::load($event->getComposer()), new Filesystem());
+    }
+
+    public function preAutoloadDump()
+    {
+        $this->includeFileWriter->write();
     }
 
     /**

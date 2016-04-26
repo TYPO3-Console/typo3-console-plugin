@@ -33,6 +33,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
+            ScriptEvents::PRE_AUTOLOAD_DUMP => array('listen'),
             ScriptEvents::POST_AUTOLOAD_DUMP => array('listen')
         );
     }
@@ -68,6 +69,9 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         }
 
         switch ($event->getName()) {
+            case ScriptEvents::PRE_AUTOLOAD_DUMP:
+                $this->pluginImplementation->preAutoloadDump();
+                break;
             case ScriptEvents::POST_AUTOLOAD_DUMP:
                 $this->pluginImplementation->postAutoloadDump();
                 break;
