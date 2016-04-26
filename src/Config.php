@@ -170,7 +170,7 @@ class Config
     /**
      * @param \Composer\IO\IOInterface $io
      * @param \Composer\Config $composerConfig
-     * @return \Composer\Config
+     * @return Config
      */
     public static function load(\Composer\IO\IOInterface $io, \Composer\Config $composerConfig)
     {
