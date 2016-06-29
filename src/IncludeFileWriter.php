@@ -38,9 +38,9 @@ class IncludeFileWriter
     const INCLUDE_FILE_TEMPLATE = '/autoload-include.tmpl.php';
 
     /**
-     * @var Event
+     * @var Config
      */
-    private $event;
+    private $config;
 
     /**
      * @var Typo3PluginConfig
@@ -55,13 +55,13 @@ class IncludeFileWriter
     /**
      * IncludeFileWriter constructor.
      *
-     * @param Event $event
+     * @param Config $config
      * @param Typo3PluginConfig $typo3PluginConfig
      * @param Filesystem $filesystem
      */
-    public function __construct(Event $event, Typo3PluginConfig $typo3PluginConfig, Filesystem $filesystem = null)
+    public function __construct(Config $config, Typo3PluginConfig $typo3PluginConfig, Filesystem $filesystem = null)
     {
-        $this->event = $event;
+        $this->config = $config;
         $this->typo3PluginConfig = $typo3PluginConfig;
         $this->filesystem = $this->filesystem ?: new Filesystem();
     }
@@ -95,6 +95,7 @@ class IncludeFileWriter
         $includeFileContent = file_get_contents($includeFileTemplate);
         $includeFileContent = self::replaceToken('web-dir', $pathToTypo3WebCode, $includeFileContent);
         $includeFileContent = self::replaceToken('root-dir', $pathToProjectRoot, $includeFileContent);
+        $includeFileContent = self::replaceToken('active-typo3-extensions', var_export(implode(',', $this->config->get('active-typo3-extensions')), true), $includeFileContent);
 
         return $includeFileContent;
     }

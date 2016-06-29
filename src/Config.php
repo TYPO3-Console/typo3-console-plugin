@@ -51,8 +51,8 @@ class Config
     public function merge($config)
     {
         // override defaults with given config
-        if (!empty($config['extra']['helhum/typo3-console-plugin']) && is_array($config['extra']['helhum/typo3-console-plugin'])) {
-            foreach ($config['extra']['helhum/typo3-console-plugin'] as $key => $val) {
+        if (!empty($config['extra']['helhum/typo3-console']) && is_array($config['extra']['helhum/typo3-console'])) {
+            foreach ($config['extra']['helhum/typo3-console'] as $key => $val) {
                 $this->config[$key] = $val;
             }
         }
