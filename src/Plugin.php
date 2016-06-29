@@ -28,6 +28,11 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     private $pluginImplementation;
 
     /**
+     * @var array
+     */
+    private $handledEvents = array();
+
+    /**
      * {@inheritDoc}
      */
     public static function getSubscribedEvents()
@@ -57,6 +62,10 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      */
     public function listen(Event $event)
     {
+        if (!empty($this->handledEvents[$event->getName()])) {
+            return;
+        }
+        $this->handledEvents[$event->getName()] = true;
         // Plugin has been uninstalled
         if (!file_exists(__FILE__) || !file_exists(__DIR__ . '/PluginImplementation.php')) {
             return;
