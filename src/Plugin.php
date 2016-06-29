@@ -77,12 +77,4 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                 break;
         }
     }
-
-    /**
-     * @param PluginImplementation $pluginImplementation
-     */
-    public function setPluginImpl(PluginImplementation $pluginImplementation)
-    {
-        $this->pluginImplementation = $pluginImplementation;
-    }
 }

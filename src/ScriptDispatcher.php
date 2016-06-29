@@ -25,11 +25,6 @@ class ScriptDispatcher
     private $event;
 
     /**
-     * @var Config
-     */
-    private $config;
-
-    /**
      * @var Composer
      */
     private $composer;
@@ -43,13 +38,11 @@ class ScriptDispatcher
      * ScriptDispatcher constructor.
      *
      * @param Event $event
-     * @param Config $config
      */
-    public function __construct(Event $event, Config $config)
+    public function __construct(Event $event)
     {
         $this->event = $event;
         $this->composer = $event->getComposer();
-        $this->config = $config;
     }
 
     public function executeScripts()

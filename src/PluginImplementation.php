@@ -47,7 +47,7 @@ class PluginImplementation
     public function __construct(Event $event, ScriptDispatcher $scriptDispatcher = null, IncludeFileWriter $includeFileWriter = null)
     {
         $this->event = $event;
-        $this->scriptDispatcher = $scriptDispatcher ?: new ScriptDispatcher($event, Config::load($event->getIO(), $event->getComposer()->getConfig()));
+        $this->scriptDispatcher = $scriptDispatcher ?: new ScriptDispatcher($event);
         $this->includeFileWriter = $includeFileWriter ?: new IncludeFileWriter($event, Typo3PluginConfig::load($event->getComposer()), new Filesystem());
     }
 

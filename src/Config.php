@@ -72,7 +72,7 @@ class Config
             case 'env-dir':
             case 'cache-dir':
                 $val = rtrim($this->process($this->config[$key], $flags), '/\\');
-                return ($flags & self::RELATIVE_PATHS == 1) ? $val : $this->realpath($val);
+                return ($flags & self::RELATIVE_PATHS === 1) ? $val : $this->realpath($val);
             default:
                 if (!isset($this->config[$key])) {
                     return null;

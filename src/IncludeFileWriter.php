@@ -76,6 +76,8 @@ class IncludeFileWriter
      * Constructs the include file content
      *
      * @return string
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
      */
     protected function getIncludeFileContent()
     {
@@ -107,7 +109,6 @@ class IncludeFileWriter
      */
     private static function replaceToken($name, $content, $subject)
     {
-        $subject = str_replace('\'{$' . $name . '}\'', $content, $subject);
-        return $subject;
+        return str_replace('\'{$' . $name . '}\'', $content, $subject);
     }
 }
