@@ -27,7 +27,7 @@
         "composer/composer": "^1.0"
     },
     "scripts": {
-        "pre-autoload-dump": "[ ! -f res/php/autoload-include.php ] && echo '<?php' > res/php/autoload-include.php"
+        "pre-autoload-dump": "[ -f res/php/autoload-include.php ] || echo '<?php' > res/php/autoload-include.php"
     },
     "extra": {
         "class": "Helhum\\Typo3ConsolePlugin\\Plugin",
