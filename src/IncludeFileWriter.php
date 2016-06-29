@@ -24,6 +24,7 @@ namespace Helhum\Typo3ConsolePlugin;
 
 use Composer\Autoload\ClassLoader;
 use Composer\Composer;
+use Composer\IO\IOInterface;
 use Composer\Script\Event;
 use Composer\Util\Filesystem;
 use \TYPO3\CMS\Composer\Plugin\Config as Typo3PluginConfig;
@@ -36,6 +37,11 @@ class IncludeFileWriter
     const RESOURCES_PATH = '/res/php';
     const INCLUDE_FILE = '/autoload-include.php';
     const INCLUDE_FILE_TEMPLATE = '/autoload-include.tmpl.php';
+
+    /**
+     * @var IOInterface
+     */
+    private $io;
 
     /**
      * @var Config
@@ -55,12 +61,14 @@ class IncludeFileWriter
     /**
      * IncludeFileWriter constructor.
      *
+     * @param IOInterface $io
      * @param Config $config
      * @param Typo3PluginConfig $typo3PluginConfig
      * @param Filesystem $filesystem
      */
-    public function __construct(Config $config, Typo3PluginConfig $typo3PluginConfig, Filesystem $filesystem = null)
+    public function __construct(IOInterface $io, Config $config, Typo3PluginConfig $typo3PluginConfig, Filesystem $filesystem = null)
     {
+        $this->io = $io;
         $this->config = $config;
         $this->typo3PluginConfig = $typo3PluginConfig;
         $this->filesystem = $this->filesystem ?: new Filesystem();
@@ -95,7 +103,12 @@ class IncludeFileWriter
         $includeFileContent = file_get_contents($includeFileTemplate);
         $includeFileContent = self::replaceToken('web-dir', $pathToTypo3WebCode, $includeFileContent);
         $includeFileContent = self::replaceToken('root-dir', $pathToProjectRoot, $includeFileContent);
-        $includeFileContent = self::replaceToken('active-typo3-extensions', var_export(implode(',', $this->config->get('active-typo3-extensions')), true), $includeFileContent);
+        $activeTypo3Extensions = $this->config->get('active-typo3-extensions');
+        if (!is_array($activeTypo3Extensions)) {
+            $this->io->writeError(sprintf('<error>Extra section "active-typo3-extensions" must be array, "%s" given!</error>', gettype($activeTypo3Extensions)));
+        } else {
+            $includeFileContent = self::replaceToken('active-typo3-extensions', var_export(implode(',', $activeTypo3Extensions), true), $includeFileContent);
+        }
 
         return $includeFileContent;
     }

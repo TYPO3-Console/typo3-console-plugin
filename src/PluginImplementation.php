@@ -48,7 +48,7 @@ class PluginImplementation
     {
         $this->event = $event;
         $this->scriptDispatcher = $scriptDispatcher ?: new ScriptDispatcher($event);
-        $this->includeFileWriter = $includeFileWriter ?: new IncludeFileWriter(Config::load($event->getIO(), $event->getComposer()->getConfig()), Typo3PluginConfig::load($event->getComposer()), new Filesystem());
+        $this->includeFileWriter = $includeFileWriter ?: new IncludeFileWriter($event->getIO(), Config::load($event->getIO(), $event->getComposer()->getConfig()), Typo3PluginConfig::load($event->getComposer()), new Filesystem());
     }
 
     public function preAutoloadDump()
