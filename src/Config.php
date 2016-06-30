@@ -21,7 +21,7 @@ class Config
      * @var array
      */
     public static $defaultConfig = array(
-        'active-typo3-extensions' => array()
+        'active-framework-extensions' => array()
     );
 
     /**

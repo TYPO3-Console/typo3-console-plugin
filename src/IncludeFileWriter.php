@@ -103,11 +103,11 @@ class IncludeFileWriter
         $includeFileContent = file_get_contents($includeFileTemplate);
         $includeFileContent = self::replaceToken('web-dir', $pathToTypo3WebCode, $includeFileContent);
         $includeFileContent = self::replaceToken('root-dir', $pathToProjectRoot, $includeFileContent);
-        $activeTypo3Extensions = $this->config->get('active-typo3-extensions');
-        if (!is_array($activeTypo3Extensions)) {
-            $this->io->writeError(sprintf('<error>Extra section "active-typo3-extensions" must be array, "%s" given!</error>', gettype($activeTypo3Extensions)));
+        $activeTypo3FrameworkExtensions = $this->config->get('active-framework-extensions');
+        if (!is_array($activeTypo3FrameworkExtensions)) {
+            $this->io->writeError(sprintf('<error>Extra section "active-framework-extensions" must be array, "%s" given!</error>', gettype($activeTypo3FrameworkExtensions)));
         } else {
-            $includeFileContent = self::replaceToken('active-typo3-extensions', var_export(implode(',', $activeTypo3Extensions), true), $includeFileContent);
+            $includeFileContent = self::replaceToken('active-framework-extensions', var_export(implode(',', $activeTypo3FrameworkExtensions), true), $includeFileContent);
         }
 
         return $includeFileContent;
