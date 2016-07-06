@@ -21,6 +21,7 @@ class Config
      * @var array
      */
     public static $defaultConfig = array(
+        'install-binary' => true,
         'active-typo3-extensions' => array()
     );
 
@@ -70,8 +71,7 @@ class Config
     public function get($key, $flags = 0)
     {
         switch ($key) {
-            case 'env-dir':
-            case 'cache-dir':
+            case 'some-dir':
                 $val = rtrim($this->process($this->config[$key], $flags), '/\\');
                 return ($flags & self::RELATIVE_PATHS === 1) ? $val : $this->realpath($val);
             default:
@@ -172,6 +172,8 @@ class Config
      * @param \Composer\IO\IOInterface $io
      * @param \Composer\Config $composerConfig
      * @return Config
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
      */
     public static function load(\Composer\IO\IOInterface $io, \Composer\Config $composerConfig)
     {
