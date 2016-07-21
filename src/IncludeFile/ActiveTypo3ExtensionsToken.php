@@ -86,6 +86,7 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
             $this->io->writeError('<warning>Please just add typo3/cms framework packages to the require section in your composer.json of any package.</warning>');
         }
         $activeTypo3Extensions = array_unique(array_merge($configuredActiveTypo3Extensions, $this->getRequiredCoreExtensionKeysFromPackageRequires()));
+        asort($activeTypo3Extensions);
         $this->io->writeError('<info>The following extensions are marked as active:</info> ' . implode(', ', $activeTypo3Extensions), true, IOInterface::VERBOSE);
         return var_export(implode(',', $activeTypo3Extensions), true);
     }
