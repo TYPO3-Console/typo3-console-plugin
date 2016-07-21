@@ -63,7 +63,8 @@ class ScriptDispatcher
         $this->loader->register();
     }
 
-    private function unRegisterLoader() {
+    private function unRegisterLoader()
+    {
         $this->loader->unregister();
     }
 }

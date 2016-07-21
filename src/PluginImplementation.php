@@ -10,12 +10,12 @@ namespace Helhum\Typo3ConsolePlugin;
  * file that was distributed with this source code.
  */
 
-use Composer\Autoload\ClassLoader;
-use Composer\Composer;
-use Composer\IO\IOInterface;
 use Composer\Script\Event;
 use Composer\Util\Filesystem;
-use \TYPO3\CMS\Composer\Plugin\Config as Typo3PluginConfig;
+use Helhum\Typo3ConsolePlugin\IncludeFile\ActiveTypo3ExtensionsToken;
+use Helhum\Typo3ConsolePlugin\IncludeFile\BaseDirToken;
+use Helhum\Typo3ConsolePlugin\IncludeFile\WebDirToken;
+use TYPO3\CMS\Composer\Plugin\Config as Typo3PluginConfig;
 
 /**
  * Class Plugin
@@ -33,27 +33,35 @@ class PluginImplementation
     private $scriptDispatcher;
 
     /**
-     * @var IncludeFileWriter
+     * @var IncludeFile
      */
-    private $includeFileWriter;
+    private $includeFile;
 
     /**
      * PluginImplementation constructor.
      *
      * @param Event $event
-     * @param IncludeFileWriter $includeFileWriter
+     * @param IncludeFile $includeFile
      * @param ScriptDispatcher $scriptDispatcher
      */
-    public function __construct(Event $event, ScriptDispatcher $scriptDispatcher = null, IncludeFileWriter $includeFileWriter = null)
+    public function __construct(Event $event, ScriptDispatcher $scriptDispatcher = null, IncludeFile $includeFile = null)
     {
         $this->event = $event;
         $this->scriptDispatcher = $scriptDispatcher ?: new ScriptDispatcher($event);
-        $this->includeFileWriter = $includeFileWriter ?: new IncludeFileWriter($event->getIO(), Config::load($event->getIO(), $event->getComposer()->getConfig()), Typo3PluginConfig::load($event->getComposer()), new Filesystem());
+        $this->includeFile = $includeFile
+            ?: new IncludeFile($event->getIO(),
+                array(
+                    new BaseDirToken($event->getIO(), Typo3PluginConfig::load($event->getComposer())),
+                    new WebDirToken($event->getIO(), Typo3PluginConfig::load($event->getComposer())),
+                    new ActiveTypo3ExtensionsToken($event->getIO(), $event->getComposer(), Config::load($event->getIO(), $event->getComposer()->getConfig())),
+                ),
+                new Filesystem()
+            );
     }
 
     public function preAutoloadDump()
     {
-        $this->includeFileWriter->write();
+        $this->includeFile->write();
     }
 
     /**
