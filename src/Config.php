@@ -22,6 +22,7 @@ class Config
      */
     public static $defaultConfig = array(
         'install-binary' => true,
+        'install-extension-dummy' => true,
         'active-typo3-extensions' => array()
     );
 
