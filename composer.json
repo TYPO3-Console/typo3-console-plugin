@@ -6,7 +6,7 @@
     "keywords": [
         "typo3 console", "composer", "plugin"
     ],
-    "homepage": "http://github.com/helhum/typo3-console-plugin",
+    "homepage": "https://github.com/helhum/typo3-console-plugin",
     "authors": [
         {
             "name": "Helmut Hummel",
