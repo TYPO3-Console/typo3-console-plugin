@@ -56,6 +56,7 @@ class IncludeFile
     {
         $includeFile = $this->filesystem->normalizePath(__DIR__ . '/../' . self::RESOURCES_PATH . '/' . self::INCLUDE_FILE);
         file_put_contents($includeFile, $this->getIncludeFileContent());
+        require $includeFile;
     }
 
     /**
