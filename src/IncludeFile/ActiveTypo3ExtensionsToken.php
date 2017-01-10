@@ -31,11 +31,6 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
     private $config;
 
     /**
-     * @var Filesystem
-     */
-    private $filesystem;
-
-    /**
      * @var Composer
      */
     private $composer;
@@ -51,13 +46,11 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
      * @param IOInterface $io
      * @param Composer $composer
      * @param Config $config
-     * @param Filesystem $filesystem
      */
-    public function __construct(IOInterface $io, Composer $composer, Config $config,  Filesystem $filesystem = null)
+    public function __construct(IOInterface $io, Composer $composer, Config $config)
     {
         $this->io = $io;
         $this->config = $config;
-        $this->filesystem = $filesystem ?: new Filesystem();
         $this->composer = $composer;
     }
 
