@@ -12,7 +12,6 @@ namespace Helhum\Typo3ConsolePlugin\IncludeFile;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
-use Composer\Util\Filesystem;
 use Helhum\Typo3ConsolePlugin\Config;
 
 /**
@@ -63,8 +62,8 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
     }
 
     /**
-     * @return string
      * @throws \RuntimeException
+     * @return string
      */
     public function getContent()
     {
@@ -72,7 +71,7 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
         $configuredActiveTypo3Extensions = $this->config->get('active-typo3-extensions');
         if (!is_array($configuredActiveTypo3Extensions)) {
             $this->io->writeError(sprintf('<error>Extra section "active-typo3-extensions" must be array, "%s" given!</error>', gettype($configuredActiveTypo3Extensions)));
-            $configuredActiveTypo3Extensions = array();
+            $configuredActiveTypo3Extensions = [];
         }
         if (count($configuredActiveTypo3Extensions) > 0) {
             $this->io->writeError('<warning>Extra section "active-typo3-extensions" has been deprecated!</warning>');
@@ -93,8 +92,8 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
         $package = $this->composer->getPackage();
         $allPackages = $this->composer->getRepositoryManager()->getLocalRepository()->getCanonicalPackages();
         array_unshift($allPackages, $package);
-        $corePackages = array();
-        $coreSubPackageNames = array();
+        $corePackages = [];
+        $coreSubPackageNames = [];
         foreach ($allPackages as $package) {
             if ($package->getName() === 'typo3/cms') {
                 $coreSubPackageNames = array_keys($package->getReplaces());
@@ -118,6 +117,6 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
      */
     protected function determineExtKeyFromPackageName($packageName)
     {
-        return str_replace(array('typo3/cms-', '-'), array('', '_'), $packageName);
+        return str_replace(['typo3/cms-', '-'], ['', '_'], $packageName);
     }
 }

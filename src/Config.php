@@ -20,11 +20,11 @@ class Config
     /**
      * @var array
      */
-    public static $defaultConfig = array(
+    public static $defaultConfig = [
         'install-binary' => true,
         'install-extension-dummy' => true,
-        'active-typo3-extensions' => array()
-    );
+        'active-typo3-extensions' => [],
+    ];
 
     /**
      * @var array
@@ -89,7 +89,7 @@ class Config
      */
     public function all($flags = 0)
     {
-        $all = array();
+        $all = [];
         foreach (array_keys($this->config) as $key) {
             $all['config'][$key] = $this->get($key, $flags);
         }
@@ -102,9 +102,9 @@ class Config
      */
     public function raw()
     {
-        return array(
+        return [
             'config' => $this->config,
-        );
+        ];
     }
 
     /**
@@ -172,15 +172,15 @@ class Config
     /**
      * @param \Composer\IO\IOInterface $io
      * @param \Composer\Config $composerConfig
-     * @return Config
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
+     * @return Config
      */
     public static function load(\Composer\IO\IOInterface $io, \Composer\Config $composerConfig)
     {
         static $config;
         if ($config === null) {
-            $baseDir = realpath(substr($composerConfig->get('vendor-dir'), 0, -strlen($composerConfig->get('vendor-dir', Config::RELATIVE_PATHS))));
+            $baseDir = realpath(substr($composerConfig->get('vendor-dir'), 0, -strlen($composerConfig->get('vendor-dir', self::RELATIVE_PATHS))));
             $localConfig = \Composer\Factory::getComposerFile();
             $file = new \Composer\Json\JsonFile($localConfig, new \Composer\Util\RemoteFilesystem($io));
 

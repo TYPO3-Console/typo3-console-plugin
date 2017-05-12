@@ -50,11 +50,11 @@ class PluginImplementation
         $this->scriptDispatcher = $scriptDispatcher ?: new ScriptDispatcher($event);
         $this->includeFile = $includeFile
             ?: new IncludeFile($event->getIO(),
-                array(
+                [
                     new BaseDirToken($event->getIO(), Typo3PluginConfig::load($event->getComposer())),
                     new WebDirToken($event->getIO(), Typo3PluginConfig::load($event->getComposer())),
                     new ActiveTypo3ExtensionsToken($event->getIO(), $event->getComposer(), Config::load($event->getIO(), $event->getComposer()->getConfig())),
-                ),
+                ],
                 new Filesystem()
             );
     }
