@@ -46,9 +46,6 @@ class ScriptDispatcher
      */
     public static function addInstallerScript($installerScript)
     {
-        if (!in_array(InstallerScriptInterface::class, class_implements($installerScript))) {
-            throw new \UnexpectedValueException(sprintf('Installer script "%s" does not implement "%s"', $installerScript, InstallerScriptInterface::class), 1494599103);
-        }
         self::$scripts[] = $installerScript;
     }
 
@@ -70,6 +67,9 @@ class ScriptDispatcher
         foreach (self::$scripts as $scriptClass) {
             /** @var InstallerScriptInterface $script */
             $script = new $scriptClass();
+            if (!$script instanceof InstallerScriptInterface) {
+                throw new \UnexpectedValueException(sprintf('Installer script "%s" does not implement "%s"', $scriptClass, InstallerScriptInterface::class), 1494599103);
+            }
             if ($script->shouldRun($this->event)) {
                 $io->writeError(sprintf('<info>Executing "%s": </info>', $scriptClass), true, $io::DEBUG);
                 if (!$script->run($this->event)) {
