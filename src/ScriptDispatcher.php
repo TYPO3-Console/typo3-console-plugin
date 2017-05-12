@@ -10,15 +10,20 @@ namespace Helhum\Typo3ConsolePlugin;
  * file that was distributed with this source code.
  */
 
-use Composer\Autoload\ClassLoader;
+use Composer\Autoload\ClassLoader as ComposerClassLoader;
 use Composer\Composer;
 use Composer\Script\Event;
+use Helhum\Typo3Console\Composer\InstallerScripts;
 
-/**
- * Class ScriptDispatcher
- */
 class ScriptDispatcher
 {
+    /**
+     * Scripts to execute when console is set up
+     *
+     * @var array
+     */
+    private static $scripts = [];
+
     /**
      * @var Event
      */
@@ -30,13 +35,24 @@ class ScriptDispatcher
     private $composer;
 
     /**
-     * @var ClassLoader
+     * @var ComposerClassLoader
      */
     private $loader;
 
     /**
-     * ScriptDispatcher constructor.
+     * This registry method is meant to be called during composer preAutoloadDump event by other plugins
      *
+     * @param string $installerScript Must be a class that implements InstallerScriptInterface
+     */
+    public static function addInstallerScript($installerScript)
+    {
+        if (!in_array(InstallerScriptInterface::class, class_implements($installerScript))) {
+            throw new \UnexpectedValueException(sprintf('Installer script "%s" does not implement "%s"', $installerScript, InstallerScriptInterface::class), 1494599103);
+        }
+        self::$scripts[] = $installerScript;
+    }
+
+    /**
      * @param Event $event
      */
     public function __construct(Event $event)
@@ -48,7 +64,22 @@ class ScriptDispatcher
     public function executeScripts()
     {
         $this->registerLoader();
-        \Helhum\Typo3Console\Composer\InstallerScripts::setupConsole($this->event, true);
+        InstallerScripts::setupConsole($this->event, true);
+
+        $io = $this->event->getIO();
+        foreach (self::$scripts as $scriptClass) {
+            /** @var InstallerScriptInterface $script */
+            $script = new $scriptClass();
+            if ($script->shouldRun($this->event)) {
+                $io->writeError(sprintf('<info>Executing "%s": </info>', $scriptClass), true, $io::DEBUG);
+                if (!$script->run($this->event)) {
+                    $io->writeError(sprintf('<error>Executing "%s" failed!</error>', $scriptClass), true);
+                }
+            } else {
+                $io->writeError(sprintf('<info>Skipped executing "%s": </info>', $scriptClass), true, $io::DEBUG);
+            }
+        }
+
         $this->unRegisterLoader();
     }
 
