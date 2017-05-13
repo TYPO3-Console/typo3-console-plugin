@@ -43,10 +43,11 @@ class ScriptDispatcher
      * This registry method is meant to be called during composer preAutoloadDump event by other plugins
      *
      * @param string $installerScript Must be a class that implements InstallerScriptInterface
+     * @param int $priority lower
      */
-    public static function addInstallerScript($installerScript)
+    public static function addInstallerScript($installerScript, $priority = 50)
     {
-        self::$scripts[] = $installerScript;
+        self::$scripts[$priority] = $installerScript;
     }
 
     /**
@@ -61,10 +62,11 @@ class ScriptDispatcher
     public function executeScripts()
     {
         $this->registerLoader();
+        $io = $this->event->getIO();
         InstallerScripts::setupConsole($this->event, true);
 
-        $io = $this->event->getIO();
-        foreach (self::$scripts as $scriptClass) {
+        ksort(self::$scripts, SORT_NUMERIC);
+        foreach (array_reverse(self::$scripts) as $scriptClass) {
             /** @var InstallerScriptInterface $script */
             $script = new $scriptClass();
             if (!$script instanceof InstallerScriptInterface) {
