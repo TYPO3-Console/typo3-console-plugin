@@ -47,7 +47,7 @@ class ScriptDispatcher
      */
     public static function addInstallerScript($installerScript, $priority = 50)
     {
-        self::$scripts[$priority] = $installerScript;
+        self::$scripts[$priority][] = $installerScript;
     }
 
     /**
@@ -66,19 +66,21 @@ class ScriptDispatcher
         InstallerScripts::setupConsole($this->event, true);
 
         ksort(self::$scripts, SORT_NUMERIC);
-        foreach (array_reverse(self::$scripts) as $scriptClass) {
-            /** @var InstallerScriptInterface $script */
-            $script = new $scriptClass();
-            if (!$script instanceof InstallerScriptInterface) {
-                throw new \UnexpectedValueException(sprintf('Installer script "%s" does not implement "%s"', $scriptClass, InstallerScriptInterface::class), 1494599103);
-            }
-            if ($script->shouldRun($this->event)) {
-                $io->writeError(sprintf('<info>Executing "%s": </info>', $scriptClass), true, $io::DEBUG);
-                if (!$script->run($this->event)) {
-                    $io->writeError(sprintf('<error>Executing "%s" failed!</error>', $scriptClass), true);
+        foreach (array_reverse(self::$scripts) as $scriptClasses) {
+            foreach ($scriptClasses as $scriptClass) {
+                /** @var InstallerScriptInterface $script */
+                $script = new $scriptClass();
+                if (!$script instanceof InstallerScriptInterface) {
+                    throw new \UnexpectedValueException(sprintf('Installer script "%s" does not implement "%s"', $scriptClass, InstallerScriptInterface::class), 1494599103);
                 }
-            } else {
-                $io->writeError(sprintf('<info>Skipped executing "%s": </info>', $scriptClass), true, $io::DEBUG);
+                if ($script->shouldRun($this->event)) {
+                    $io->writeError(sprintf('<info>Executing "%s": </info>', $scriptClass), true, $io::DEBUG);
+                    if (!$script->run($this->event)) {
+                        $io->writeError(sprintf('<error>Executing "%s" failed!</error>', $scriptClass), true);
+                    }
+                } else {
+                    $io->writeError(sprintf('<info>Skipped executing "%s": </info>', $scriptClass), true, $io::DEBUG);
+                }
             }
         }
 
