@@ -114,9 +114,18 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
     private function initializeFrameworkPackages()
     {
         $typo3Package = $this->composer->getRepositoryManager()->getLocalRepository()->findPackage('typo3/cms', new EmptyConstraint());
-        foreach ($typo3Package->getReplaces() as $name => $_) {
-            if (strpos($name, 'typo3/cms-') === 0) {
-                $this->frameworkPackages[] = $name;
+        if ($typo3Package) {
+            foreach ($typo3Package->getReplaces() as $name => $_) {
+                if (strpos($name, 'typo3/cms-') === 0) {
+                    $this->frameworkPackages[] = $name;
+                }
+            }
+        } else {
+            $packages = $this->composer->getRepositoryManager()->getLocalRepository()->getCanonicalPackages();
+            foreach ($packages as $package) {
+                if ($package->getType() === 'typo3-cms-framework') {
+                    $this->frameworkPackages[] = $package->getName();
+                }
             }
         }
     }
