@@ -44,11 +44,6 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
     private $isDevMode;
 
     /**
-     * @var array
-     */
-    private $frameworkPackages = [];
-
-    /**
      * ActiveTypo3ExtensionsToken constructor.
      *
      * @param IOInterface $io
@@ -88,7 +83,7 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
             $this->io->writeError('<warning>Extra section "active-typo3-extensions" has been deprecated!</warning>');
             $this->io->writeError('<warning>Please just add typo3/cms framework packages to the require section in your composer.json of any package.</warning>');
         }
-        $activeTypo3Extensions = array_unique(array_merge($configuredActiveTypo3Extensions, $this->getRequiredCoreExtensionKeysFromPackageRequires()));
+        $activeTypo3Extensions = array_unique(array_merge($configuredActiveTypo3Extensions, $this->getActiveCoreExtensionKeysFromComposer()));
         asort($activeTypo3Extensions);
         $this->io->writeError('<info>The following extensions are marked as active:</info> ' . implode(', ', $activeTypo3Extensions), true, IOInterface::VERBOSE);
         return var_export(implode(',', $activeTypo3Extensions), true);
@@ -97,56 +92,60 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
     /**
      * @return array
      */
-    protected function getRequiredCoreExtensionKeysFromPackageRequires()
+    private function getActiveCoreExtensionKeysFromComposer()
     {
         $this->io->writeError('<info>Determine dependencies to typo3/cms framework packages.</info>', true, IOInterface::VERY_VERBOSE);
-        $rootPackage = $this->composer->getPackage();
-        $allPackages = $this->composer->getRepositoryManager()->getLocalRepository()->getCanonicalPackages();
-        $corePackages = [];
-        $this->initializeFrameworkPackages();
-        foreach ($allPackages as $package) {
-            $corePackages = array_replace($corePackages, $this->getCorePackagesFromRequire($package));
-        }
-        $corePackages = array_replace($corePackages, $this->getCorePackagesFromRequire($rootPackage, $this->isDevMode));
-        return $corePackages;
-    }
-
-    private function initializeFrameworkPackages()
-    {
         $typo3Package = $this->composer->getRepositoryManager()->getLocalRepository()->findPackage('typo3/cms', new EmptyConstraint());
         if ($typo3Package) {
-            foreach ($typo3Package->getReplaces() as $name => $_) {
-                if (strpos($name, 'typo3/cms-') === 0) {
-                    $this->frameworkPackages[] = $name;
-                }
-            }
+            $coreExtensionKeys = $this->getCoreExtensionKeysFromTypo3Package($typo3Package);
         } else {
-            $packages = $this->composer->getRepositoryManager()->getLocalRepository()->getCanonicalPackages();
-            foreach ($packages as $package) {
-                if ($package->getType() === 'typo3-cms-framework') {
-                    $this->frameworkPackages[] = $package->getName();
+            $coreExtensionKeys = $this->getCoreExtensionKeysFromInstalledPackages();
+        }
+        return $coreExtensionKeys;
+    }
+
+    private function getCoreExtensionKeysFromTypo3Package(PackageInterface $typo3Package)
+    {
+        $coreExtensionKeys = [];
+        $frameworkPackages = [];
+        foreach ($typo3Package->getReplaces() as $name => $_) {
+            if (strpos($name, 'typo3/cms-') === 0) {
+                $frameworkPackages[] = $name;
+            }
+        }
+        $installedPackages = $this->composer->getRepositoryManager()->getLocalRepository()->getCanonicalPackages();
+        $rootPackage = $this->composer->getPackage();
+        $installedPackages[$rootPackage->getName()] = $rootPackage;
+        foreach ($installedPackages as $package) {
+            $requires = $package->getRequires();
+            if ($package === $rootPackage && $this->isDevMode) {
+                $requires = array_merge($requires, $package->getDevRequires());
+            }
+            foreach ($requires as $name => $link) {
+                if (in_array($name, $frameworkPackages, true)) {
+                    $extensionKey = $this->determineExtKeyFromPackageName($name);
+                    $this->io->writeError(sprintf('The package "%s" requires: "%s"', $package->getName(), $name), true, IOInterface::DEBUG);
+                    $this->io->writeError(sprintf('The extension key for package "%s" is: "%s"', $name, $extensionKey), true, IOInterface::DEBUG);
+                    $coreExtensionKeys[$name] = $extensionKey;
                 }
             }
         }
+        return $coreExtensionKeys;
     }
 
     /**
-     * @param PackageInterface $package
-     * @param bool $includeDev
      * @return array
      */
-    private function getCorePackagesFromRequire(PackageInterface $package, $includeDev = false)
+    private function getCoreExtensionKeysFromInstalledPackages()
     {
         $corePackages = [];
-        $requires = $package->getRequires();
-        if ($includeDev) {
-            $requires = array_merge($requires, $package->getDevRequires());
-        }
-        foreach ($requires as $name => $link) {
-            if (in_array($name, $this->frameworkPackages, true)) {
-                $this->io->writeError(sprintf('The package "%s" requires: "%s"', $package->getName(), $link->getTarget()), true, IOInterface::DEBUG);
-                $this->io->writeError(sprintf('The extension key for package "%s" is: "%s"', $link->getTarget(), $this->determineExtKeyFromPackageName($link->getTarget())), true, IOInterface::DEBUG);
-                $corePackages[$name] = $this->determineExtKeyFromPackageName($link->getTarget());
+        $installedPackages = $this->composer->getRepositoryManager()->getLocalRepository()->getCanonicalPackages();
+        foreach ($installedPackages as $package) {
+            if ($package->getType() === 'typo3-cms-framework') {
+                $extensionKey = $this->determineExtKeyFromPackageName($package->getName());
+                $this->io->writeError(sprintf('The framework package "%s" is installed.', $package->getName()), true, IOInterface::DEBUG);
+                $this->io->writeError(sprintf('The extension key for package "%s" is: "%s"', $package->getName(), $extensionKey), true, IOInterface::DEBUG);
+                $corePackages[$package->getName()] = $extensionKey;
             }
         }
         return $corePackages;
