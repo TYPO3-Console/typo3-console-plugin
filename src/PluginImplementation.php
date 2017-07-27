@@ -53,7 +53,7 @@ class PluginImplementation
                 [
                     new BaseDirToken($event->getIO(), Typo3PluginConfig::load($event->getComposer())),
                     new WebDirToken($event->getIO(), Typo3PluginConfig::load($event->getComposer())),
-                    new ActiveTypo3ExtensionsToken($event->getIO(), $event->getComposer(), Config::load($event->getIO(), $event->getComposer()->getConfig())),
+                    new ActiveTypo3ExtensionsToken($event->getIO(), $event->getComposer(), Config::load($event->getIO(), $event->getComposer()->getConfig()), $event->isDevMode()),
                 ],
                 new Filesystem()
             );

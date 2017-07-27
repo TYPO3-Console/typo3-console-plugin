@@ -12,11 +12,10 @@ namespace Helhum\Typo3ConsolePlugin\IncludeFile;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
+use Composer\Package\PackageInterface;
+use Composer\Semver\Constraint\EmptyConstraint;
 use Helhum\Typo3ConsolePlugin\Config;
 
-/**
- * Class ActiveTypo3ExtensionsToken
- */
 class ActiveTypo3ExtensionsToken implements TokenInterface
 {
     /**
@@ -40,17 +39,29 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
     private $io;
 
     /**
+     * @var bool
+     */
+    private $isDevMode;
+
+    /**
+     * @var array
+     */
+    private $frameworkPackages = [];
+
+    /**
      * ActiveTypo3ExtensionsToken constructor.
      *
      * @param IOInterface $io
      * @param Composer $composer
      * @param Config $config
+     * @param bool $isDevMode
      */
-    public function __construct(IOInterface $io, Composer $composer, Config $config)
+    public function __construct(IOInterface $io, Composer $composer, Config $config, $isDevMode = false)
     {
         $this->io = $io;
         $this->config = $config;
         $this->composer = $composer;
+        $this->isDevMode = $isDevMode;
     }
 
     /**
@@ -89,23 +100,44 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
     protected function getRequiredCoreExtensionKeysFromPackageRequires()
     {
         $this->io->writeError('<info>Determine dependencies to typo3/cms framework packages.</info>', true, IOInterface::VERY_VERBOSE);
-        $package = $this->composer->getPackage();
+        $rootPackage = $this->composer->getPackage();
         $allPackages = $this->composer->getRepositoryManager()->getLocalRepository()->getCanonicalPackages();
-        array_unshift($allPackages, $package);
         $corePackages = [];
-        $coreSubPackageNames = [];
+        $this->initializeFrameworkPackages();
         foreach ($allPackages as $package) {
-            if ($package->getName() === 'typo3/cms') {
-                $coreSubPackageNames = array_keys($package->getReplaces());
+            $corePackages = array_replace($corePackages, $this->getCorePackagesFromRequire($package));
+        }
+        $corePackages = array_replace($corePackages, $this->getCorePackagesFromRequire($rootPackage, $this->isDevMode));
+        return $corePackages;
+    }
+
+    private function initializeFrameworkPackages()
+    {
+        $typo3Package = $this->composer->getRepositoryManager()->getLocalRepository()->findPackage('typo3/cms', new EmptyConstraint());
+        foreach ($typo3Package->getReplaces() as $name => $_) {
+            if (strpos($name, 'typo3/cms-') === 0) {
+                $this->frameworkPackages[] = $name;
             }
         }
-        foreach ($allPackages as $package) {
-            foreach ($package->getRequires() as $name => $link) {
-                if (in_array($name, $coreSubPackageNames, true)) {
-                    $this->io->writeError(sprintf('The package "%s" requires: "%s"', $package->getName(), $link->getTarget()), true, IOInterface::DEBUG);
-                    $this->io->writeError(sprintf('The extension key for package "%s" is: "%s"', $link->getTarget(), $this->determineExtKeyFromPackageName($link->getTarget())), true, IOInterface::DEBUG);
-                    $corePackages[$name] = $this->determineExtKeyFromPackageName($link->getTarget());
-                }
+    }
+
+    /**
+     * @param PackageInterface $package
+     * @param bool $includeDev
+     * @return array
+     */
+    private function getCorePackagesFromRequire(PackageInterface $package, $includeDev = false)
+    {
+        $corePackages = [];
+        $requires = $package->getRequires();
+        if ($includeDev) {
+            $requires = array_merge($requires, $package->getDevRequires());
+        }
+        foreach ($requires as $name => $link) {
+            if (in_array($name, $this->frameworkPackages, true)) {
+                $this->io->writeError(sprintf('The package "%s" requires: "%s"', $package->getName(), $link->getTarget()), true, IOInterface::DEBUG);
+                $this->io->writeError(sprintf('The extension key for package "%s" is: "%s"', $link->getTarget(), $this->determineExtKeyFromPackageName($link->getTarget())), true, IOInterface::DEBUG);
+                $corePackages[$name] = $this->determineExtKeyFromPackageName($link->getTarget());
             }
         }
         return $corePackages;
@@ -115,7 +147,7 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
      * @param string $packageName
      * @return string
      */
-    protected function determineExtKeyFromPackageName($packageName)
+    private function determineExtKeyFromPackageName($packageName)
     {
         return str_replace(['typo3/cms-', '-'], ['', '_'], $packageName);
     }
