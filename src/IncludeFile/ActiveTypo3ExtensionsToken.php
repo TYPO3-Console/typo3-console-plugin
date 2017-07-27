@@ -85,7 +85,7 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
         }
         $activeTypo3Extensions = array_unique(array_merge($configuredActiveTypo3Extensions, $this->getActiveCoreExtensionKeysFromComposer()));
         asort($activeTypo3Extensions);
-        $this->io->writeError('<info>The following extensions are marked as active:</info> ' . implode(', ', $activeTypo3Extensions), true, IOInterface::VERBOSE);
+        $this->io->writeError('<info>The following TYPO3 core extensions are marked as active:</info> ' . implode(', ', $activeTypo3Extensions), true, IOInterface::VERBOSE);
         return var_export(implode(',', $activeTypo3Extensions), true);
     }
 
