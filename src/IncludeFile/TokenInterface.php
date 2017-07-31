@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace Helhum\Typo3ConsolePlugin\IncludeFile;
 
 /*
@@ -10,9 +11,6 @@ namespace Helhum\Typo3ConsolePlugin\IncludeFile;
  * file that was distributed with this source code.
  */
 
-/**
- * Interface TokenInterface
- */
 interface TokenInterface
 {
     /**
@@ -20,12 +18,12 @@ interface TokenInterface
      *
      * @return string
      */
-    public function getName();
+    public function getName(): string;
 
     /**
      * The content the token should be replaced with
      *
      * @return string
      */
-    public function getContent();
+    public function getContent(): string;
 }

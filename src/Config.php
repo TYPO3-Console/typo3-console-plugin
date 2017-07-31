@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace Helhum\Typo3ConsolePlugin;
 
 /*
@@ -66,7 +67,7 @@ class Config
      * @throws \RuntimeException
      * @return mixed
      */
-    public function get($key, $flags = 0)
+    public function get(string $key, int $flags = 0)
     {
         switch ($key) {
             case 'some-dir':
@@ -76,6 +77,9 @@ class Config
                 if (!isset($this->config[$key])) {
                     return null;
                 }
+                if (!is_string($this->config[$key])) {
+                    return $this->config[$key];
+                }
                 return $this->process($this->config[$key], $flags);
         }
     }
@@ -84,7 +88,7 @@ class Config
      * @param int $flags Options (see class constants)
      * @return array
      */
-    public function all($flags = 0)
+    public function all(int $flags = 0): array
     {
         $all = [];
         foreach (array_keys($this->config) as $key) {
@@ -97,7 +101,7 @@ class Config
     /**
      * @return array
      */
-    public function raw()
+    public function raw(): array
     {
         return [
             'config' => $this->config,
@@ -110,7 +114,7 @@ class Config
      * @param  string $key
      * @return bool
      */
-    public function has($key)
+    public function has(string $key): bool
     {
         return array_key_exists($key, $this->config);
     }
@@ -122,17 +126,11 @@ class Config
      * @param  int $flags Options (see class constants)
      * @return string
      */
-    protected function process($value, $flags)
+    protected function process(string $value, int $flags)
     {
-        $config = $this;
-
-        if (!is_string($value)) {
-            return $value;
-        }
-
         return preg_replace_callback('#\{\$(.+)\}#',
-            function ($match) use ($config, $flags) {
-                return $config->get($match[1], $flags);
+            function ($match) use ($flags) {
+                return $this->get($match[1], $flags);
             },
             $value);
     }
@@ -145,13 +143,13 @@ class Config
      * @param  string $path
      * @return string
      */
-    protected function realpath($path)
+    protected function realpath(string $path): string
     {
         if ($path === '') {
             return $this->baseDir;
         }
 
-        if (substr($path, 0, 1) === '/' || substr($path, 1, 1) === ':') {
+        if ($path[0] === '/' || (!empty($path[1]) && $path[1] === ':')) {
             return $path;
         }
 
@@ -161,7 +159,7 @@ class Config
     /**
      * @return string
      */
-    public function getBaseDir()
+    public function getBaseDir(): string
     {
         return $this->baseDir;
     }
@@ -173,7 +171,7 @@ class Config
      * @throws \InvalidArgumentException
      * @return Config
      */
-    public static function load(\Composer\IO\IOInterface $io, \Composer\Config $composerConfig)
+    public static function load(\Composer\IO\IOInterface $io, \Composer\Config $composerConfig): Config
     {
         static $config;
         if ($config === null) {

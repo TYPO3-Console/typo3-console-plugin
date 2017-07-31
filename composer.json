@@ -19,7 +19,7 @@
         }
     },
     "require": {
-        "php": ">=5.5.0",
+        "php": ">=7.0.0 <7.2",
         "typo3/cms-composer-installers": "^1.4",
         "composer-plugin-api": "^1.0"
     },
@@ -29,7 +29,7 @@
     "extra": {
         "class": "Helhum\\Typo3ConsolePlugin\\Plugin",
         "branch-alias": {
-            "dev-master": "1.x-dev"
+            "dev-master": "2.x-dev"
         }
     }
 }

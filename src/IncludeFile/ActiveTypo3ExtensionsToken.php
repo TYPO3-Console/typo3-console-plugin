@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace Helhum\Typo3ConsolePlugin\IncludeFile;
 
 /*
@@ -62,7 +63,7 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
     /**
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -71,7 +72,7 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
      * @throws \RuntimeException
      * @return string
      */
-    public function getContent()
+    public function getContent(): string
     {
         $this->io->writeError('<info>Writing TYPO3_ACTIVE_FRAMEWORK_EXTENSIONS environment variable</info>', true, IOInterface::VERBOSE);
         $configuredActiveTypo3Extensions = $this->config->get('active-typo3-extensions');
@@ -92,7 +93,7 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
     /**
      * @return array
      */
-    private function getActiveCoreExtensionKeysFromComposer()
+    private function getActiveCoreExtensionKeysFromComposer(): array
     {
         $this->io->writeError('<info>Determine dependencies to typo3/cms framework packages.</info>', true, IOInterface::VERY_VERBOSE);
         $typo3Package = $this->composer->getRepositoryManager()->getLocalRepository()->findPackage('typo3/cms', new EmptyConstraint());
@@ -104,7 +105,11 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
         return $coreExtensionKeys;
     }
 
-    private function getCoreExtensionKeysFromTypo3Package(PackageInterface $typo3Package)
+    /**
+     * @param PackageInterface $typo3Package
+     * @return array
+     */
+    private function getCoreExtensionKeysFromTypo3Package(PackageInterface $typo3Package): array
     {
         $coreExtensionKeys = [];
         $frameworkPackages = [];
@@ -136,7 +141,7 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
     /**
      * @return array
      */
-    private function getCoreExtensionKeysFromInstalledPackages()
+    private function getCoreExtensionKeysFromInstalledPackages(): array
     {
         $corePackages = [];
         $installedPackages = $this->composer->getRepositoryManager()->getLocalRepository()->getCanonicalPackages();
@@ -155,7 +160,7 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
      * @param string $packageName
      * @return string
      */
-    private function determineExtKeyFromPackageName($packageName)
+    private function determineExtKeyFromPackageName(string $packageName): string
     {
         return str_replace(['typo3/cms-', '-'], ['', '_'], $packageName);
     }

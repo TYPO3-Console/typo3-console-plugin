@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace Helhum\Typo3ConsolePlugin;
 
 /*
@@ -81,7 +82,7 @@ class IncludeFile
      * @throws \InvalidArgumentException
      * @return string
      */
-    protected function getIncludeFileContent()
+    protected function getIncludeFileContent(): string
     {
         $includeFileTemplate = $this->filesystem->normalizePath(__DIR__ . '/../' . self::INCLUDE_FILE_TEMPLATE);
         $includeFileContent = file_get_contents($includeFileTemplate);
@@ -99,7 +100,7 @@ class IncludeFile
      * @param string $subject
      * @return string
      */
-    private static function replaceToken($name, $content, $subject)
+    private static function replaceToken($name, $content, $subject): string
     {
         return str_replace('\'{$' . $name . '}\'', $content, $subject);
     }
