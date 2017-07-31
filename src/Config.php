@@ -10,9 +10,6 @@ namespace Helhum\Typo3ConsolePlugin;
  * file that was distributed with this source code.
  */
 
-/**
- * Class Config
- */
 class Config
 {
     const RELATIVE_PATHS = 1;

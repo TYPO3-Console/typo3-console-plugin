@@ -17,9 +17,6 @@ use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
 
-/**
- * Class Plugin
- */
 class Plugin implements PluginInterface, EventSubscriberInterface
 {
     /**

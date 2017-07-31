@@ -13,13 +13,7 @@ namespace Helhum\Typo3ConsolePlugin;
 use Composer\Script\Event;
 use Composer\Util\Filesystem;
 use Helhum\Typo3ConsolePlugin\IncludeFile\ActiveTypo3ExtensionsToken;
-use Helhum\Typo3ConsolePlugin\IncludeFile\BaseDirToken;
-use Helhum\Typo3ConsolePlugin\IncludeFile\WebDirToken;
-use TYPO3\CMS\Composer\Plugin\Config as Typo3PluginConfig;
 
-/**
- * Class Plugin
- */
 class PluginImplementation
 {
     /**
@@ -28,31 +22,22 @@ class PluginImplementation
     private $event;
 
     /**
-     * @var ScriptDispatcher
-     */
-    private $scriptDispatcher;
-
-    /**
      * @var IncludeFile
      */
     private $includeFile;
 
     /**
-     * PluginImplementation constructor.
-     *
      * @param Event $event
      * @param IncludeFile $includeFile
-     * @param ScriptDispatcher $scriptDispatcher
      */
-    public function __construct(Event $event, ScriptDispatcher $scriptDispatcher = null, IncludeFile $includeFile = null)
+    public function __construct(Event $event, IncludeFile $includeFile = null)
     {
         $this->event = $event;
-        $this->scriptDispatcher = $scriptDispatcher ?: new ScriptDispatcher($event);
         $this->includeFile = $includeFile
-            ?: new IncludeFile($event->getIO(),
+            ?: new IncludeFile(
+                $event->getIO(),
+                $event->getComposer(),
                 [
-                    new BaseDirToken($event->getIO(), Typo3PluginConfig::load($event->getComposer())),
-                    new WebDirToken($event->getIO(), Typo3PluginConfig::load($event->getComposer())),
                     new ActiveTypo3ExtensionsToken($event->getIO(), $event->getComposer(), Config::load($event->getIO(), $event->getComposer()->getConfig()), $event->isDevMode()),
                 ],
                 new Filesystem()
@@ -61,7 +46,7 @@ class PluginImplementation
 
     public function preAutoloadDump()
     {
-        $this->includeFile->write();
+        $this->includeFile->register();
     }
 
     /**
@@ -69,6 +54,5 @@ class PluginImplementation
      */
     public function postAutoloadDump()
     {
-        $this->scriptDispatcher->executeScripts();
     }
 }
