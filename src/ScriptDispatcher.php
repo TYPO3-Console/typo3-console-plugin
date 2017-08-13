@@ -14,6 +14,7 @@ use Composer\Autoload\ClassLoader as ComposerClassLoader;
 use Composer\Composer;
 use Composer\Script\Event;
 use Helhum\Typo3Console\Composer\InstallerScripts;
+use Helhum\Typo3Console\Composer\LegacyInstallerScripts;
 
 class ScriptDispatcher
 {
@@ -63,7 +64,11 @@ class ScriptDispatcher
     {
         $this->registerLoader();
         $io = $this->event->getIO();
-        InstallerScripts::setupConsole($this->event, true);
+        if (is_callable('Helhum\\Typo3Console\\Composer\\LegacyInstallerScripts::setupConsole')) {
+            LegacyInstallerScripts::setupConsole($this->event);
+        } else {
+            InstallerScripts::setupConsole($this->event, true);
+        }
 
         ksort(self::$scripts, SORT_NUMERIC);
         foreach (array_reverse(self::$scripts) as $scriptClasses) {
