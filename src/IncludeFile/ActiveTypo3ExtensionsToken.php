@@ -114,7 +114,7 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
         $coreExtensionKeys = [];
         $frameworkPackages = [];
         foreach ($typo3Package->getReplaces() as $name => $_) {
-            if (strpos($name, 'typo3/cms-') === 0) {
+            if (is_string($name) && strpos($name, 'typo3/cms-') === 0) {
                 $frameworkPackages[] = $name;
             }
         }
