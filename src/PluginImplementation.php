@@ -14,6 +14,7 @@ namespace Helhum\Typo3ConsolePlugin;
 use Composer\Script\Event;
 use Composer\Util\Filesystem;
 use Helhum\Typo3ConsolePlugin\IncludeFile\ActiveTypo3ExtensionsToken;
+use TYPO3\CMS\Composer\Plugin\Core\IncludeFile;
 
 class PluginImplementation
 {
