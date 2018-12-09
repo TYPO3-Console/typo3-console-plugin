@@ -19,7 +19,7 @@
         }
     },
     "require": {
-        "php": ">=7.0.0 <7.3",
+        "php": "^7.0",
         "typo3/cms-composer-installers": "^1.4 || ^2.0",
         "composer-plugin-api": "^1.0"
     },
