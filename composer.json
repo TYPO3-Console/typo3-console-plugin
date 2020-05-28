@@ -24,8 +24,7 @@
         "composer-plugin-api": "^1.0 || ^2.0"
     },
     "require-dev": {
-        "composer/composer": "^1.0@dev || ^2.0@dev",
-        "composer/semver": "^1.0@dev || ^2.0@dev"
+        "composer/composer": "^1.10@dev || ^2.0@dev"
     },
     "extra": {
         "class": "Helhum\\Typo3ConsolePlugin\\Plugin",
