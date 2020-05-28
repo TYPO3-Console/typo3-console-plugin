@@ -13,7 +13,6 @@ namespace Helhum\Typo3ConsolePlugin\IncludeFile;
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
-use Composer\Semver\Constraint\EmptyConstraint;
 use Helhum\Typo3ConsolePlugin\Config;
 
 class ActiveTypo3ExtensionsToken implements TokenInterface
@@ -95,7 +94,7 @@ class ActiveTypo3ExtensionsToken implements TokenInterface
     private function getActiveCoreExtensionKeysFromComposer()
     {
         $this->io->writeError('<info>Determine dependencies to typo3/cms framework packages.</info>', true, IOInterface::VERY_VERBOSE);
-        $typo3Package = $this->composer->getRepositoryManager()->getLocalRepository()->findPackage('typo3/cms', new EmptyConstraint());
+        $typo3Package = $this->composer->getRepositoryManager()->getLocalRepository()->findPackage('typo3/cms', '*');
         if ($typo3Package) {
             $coreExtensionKeys = $this->getCoreExtensionKeysFromTypo3Package($typo3Package);
         } else {
